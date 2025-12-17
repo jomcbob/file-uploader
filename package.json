@@ -15,15 +15,25 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/jomcbob/node_template/issues"
   },
   "homepage": "https://github.com/jomcbob/node_template#readme",
   "dependencies": {
+    "@prisma/adapter-pg": "^7.1.0",
+    "@prisma/client": "^7.1.0",
+    "@quixo3/prisma-session-store": "^3.1.13",
+    "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.3",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
-    "pg": "^8.16.3"
+    "express-session": "^1.18.2",
+    "express-validator": "^7.3.1",
+    "multer": "^2.0.2",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "pg": "^8.16.3",
+    "prisma": "^7.1.0"
   }
 }

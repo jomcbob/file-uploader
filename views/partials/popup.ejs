@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="/styles/popup.css">
+
+<div class="popup-wrapper" id="contact-popup" style="display:none;">
+  <div id="popup-container" class="popup-container">
+
+    <form action="/submit-image" method="post" id="fileForm" enctype="multipart/form-data" class="popup-form hidden">
+      <legend>File Name</legend>
+      <input type="file" name="fileName" id="fileName">
+      <div class="buttons">
+        <button type="submit">Create</button>
+        <button type="button" class="closePopup">Close</button>
+      </div>
+    </form>
+
+    <form action="/submit-folder" method="post" id="folderForm" class="popup-form hidden">
+      <legend>Folder Name</legend>
+      <input type="text" name="folderName" id="folderName">
+      <div class="buttons">
+        <button type="submit">Create</button>
+        <button type="button" class="closePopup">Close</button>
+      </div>
+    </form>
+
+  </div>
+</div>

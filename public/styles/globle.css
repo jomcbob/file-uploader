@@ -1,0 +1,38 @@
+/* 
+Background: #121212 (charcoal black)
+Primary Text: #E0E0E0 (light gray)
+Secondary Text: #B0B0B0 (medium gray)
+Borders/Dividers: #444444 (dark gray)
+Accent: #888888 (soft gray)
+*/
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
+  background-color: #444444;
+  color: #E0E0E0;
+}
+
+a {
+  color: #E0E0E0;
+  background-color: #121212;
+  text-decoration: none;
+  margin: 5px;
+  padding: 10px 20px;
+  border-radius: 5px;
+  border: 2px solid #444444;
+}
+
+a:hover,
+a:focus {
+  background-color: #444444;
+}

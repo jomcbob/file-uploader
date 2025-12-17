@@ -1,0 +1,74 @@
+.mainContent {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  grid-template-rows: 1fr 10fr;
+  height: 100vh;
+  width: 100vw;
+}
+
+header {
+  grid-column: 1 / -1;
+  grid-row: 1 / 2;
+  background-color: #121212;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 2px solid #444444;
+  align-items: center;
+}
+
+header nav {
+  display: flex;
+  justify-content: space-between;
+  flex: 1;
+  padding: 10px 20px;
+  align-items: center;
+}
+
+aside {
+  grid-column: 1 / 2;
+  grid-row: 2 / -1;
+  background-color: #121212;
+  border-right: 2px solid #444444;
+  padding: 20px;
+  width: min(300px, 100%);
+  
+}
+
+section {
+  grid-column: 2 / -1;
+  grid-row: 2 / -1;
+  padding: 20px;
+  width: 100%;
+}
+
+.flexWrap {
+  flex-wrap: wrap;
+}
+
+.tree,
+.tree ul {
+  list-style: none;
+  padding-left: 16px;
+}
+
+.children {
+  display: none;
+  border-left: 1px dotted #999;
+  margin-left: 6px;
+}
+
+.folder {
+  cursor: pointer;
+  font-weight: 600;
+  user-select: none;
+}
+
+.folder .icon {
+  display: inline-block;
+  width: 14px;
+}
+
+.file {
+  margin-left: 20px;
+}

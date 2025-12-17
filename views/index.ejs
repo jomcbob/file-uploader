@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>
+    <%= title %>
+  </title>
+  <link rel="stylesheet" href="/styles/globle.css">
+  <link rel="stylesheet" href="/styles/index.css">
+</head>
+
+<body>
+
+  <div class="mainContent">
+    <header>
+      <nav>
+        <h1>File Uploader</h1>
+        <div class="flexWrap">
+          <% if (user) { %>
+            Logged in as <%= user.username %>
+              <a href="/auth/logout">Log Out</a>
+              <% } else { %>
+                Not logged in
+                <a href="/auth/login">Log In</a>
+                <% } %>
+
+        </div>
+      </nav>
+    </header>
+    <aside>
+      <h2>Upload an Image</h2>
+      <button id="openFilePopup">New File</button>
+      <button id="openFolderPopup">New Folder</button>
+      <hr>
+
+      <ul class="tree">
+        <% function render(nodes) { %>
+          <% nodes.forEach(node=> { %>
+            <li>
+              <% if (node.type==="FOLDER" ) { %>
+                <div class="folder" data-open="false">
+                  <span class="icon">▶</span>
+                  <span class="name">
+                    <%= node.name %>
+                  </span>
+                </div>
+                <ul class="children">
+                  <%= render(node.children) %>
+                </ul>
+                <% } else { %>
+                  <div class="file">
+                    📄 <%= node.name %>
+                      <small>(<%= node.size %> bytes)</small>
+                  </div>
+                  <% } %>
+            </li>
+            <% }) %>
+              <% } %>
+
+                <%= render(tree) %>
+      </ul>
+
+    </aside>
+    <section>
+      <p>
+        Use the form below to upload an image file to the server. Make sure you are logged in to access the upload
+        feature.
+      </p>
+    </section>
+  </div>
+
+  <%- include('./partials/popup') %>
+</body>
+
+<script src="/js/popup.js"></script>
+<script>
+  document.addEventListener("click", e => {
+    const folder = e.target.closest(".folder");
+    if (!folder) return;
+
+    const children = folder.nextElementSibling;
+    const icon = folder.querySelector(".icon");
+
+    const open = folder.dataset.open === "true";
+    folder.dataset.open = (!open).toString();
+
+    children.style.display = open ? "none" : "block";
+    icon.textContent = open ? "▶" : "▼";
+  });
+</script>
+
+
+</html>
