@@ -22,7 +22,7 @@ body {
   color: #E0E0E0;
 }
 
-a {
+header a {
   color: #E0E0E0;
   background-color: #121212;
   text-decoration: none;
@@ -32,7 +32,7 @@ a {
   border: 2px solid #444444;
 }
 
-a:hover,
-a:focus {
+header a:hover,
+header a:focus {
   background-color: #444444;
 }

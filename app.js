@@ -22,9 +22,11 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(authApp);
 
-app.use("/", indexRoute);
+// non-auth routes first otherwise redirect loop
 app.use("/auth", authRoute);
-app.use("/three", routeThree);
+// protected routes
+app.use("/", authController.isAuthenticated, indexRoute);
+app.use("/three", authController.isAuthenticated, routeThree);
 
 app.get('/{*splat}', (req, res, next) => {
   const err = new Error(`Page not found: ${req.originalUrl}`);

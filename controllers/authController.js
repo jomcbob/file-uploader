@@ -12,14 +12,6 @@ function isAuthenticated(req, res, next) {
   }
 }
 
-function isAdmin(req, res, next) {
-  if (req.isAuthenticated() && req.user.isadmin) {
-    return next();
-  } else {
-    return next(new Error('User not authorized as admin'));
-  }
-}
-
 function loginUser(req, res, next) {
   passport.authenticate("local", {
     successRedirect: "/",
@@ -39,7 +31,6 @@ function logoutUser(req, res) {
 export default {
   renderIndex,
   loginUser,
-  isAdmin,
   isAuthenticated,
   logoutUser
 }

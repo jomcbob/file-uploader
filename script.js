@@ -8,8 +8,8 @@ async function main() {
       password: await bcrypt.hash('password', 10),  
       documents: {
         create: {
-          name: 'My First File',
-          type: 'FILE',       
+          name: 'Root Folder',
+          type: 'FOLDER',       
           size: 1024,         
           mimeType: 'text/plain', 
         },

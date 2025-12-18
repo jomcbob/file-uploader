@@ -6,6 +6,7 @@
     <form action="/submit-image" method="post" id="fileForm" enctype="multipart/form-data" class="popup-form hidden">
       <legend>File Name</legend>
       <input type="file" name="fileName" id="fileName">
+      <input type="hidden" value="<%= selectedFolderId %>" name="parentId" id="parentId">
       <div class="buttons">
         <button type="submit">Create</button>
         <button type="button" class="closePopup">Close</button>
@@ -15,6 +16,7 @@
     <form action="/submit-folder" method="post" id="folderForm" class="popup-form hidden">
       <legend>Folder Name</legend>
       <input type="text" name="folderName" id="folderName">
+      <input type="hidden" value="<%= selectedFolderId %>" name="parentId" id="parentId">
       <div class="buttons">
         <button type="submit">Create</button>
         <button type="button" class="closePopup">Close</button>

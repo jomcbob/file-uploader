@@ -1,0 +1,65 @@
+<link rel="stylesheet" href="/styles/entityInfo.css">
+
+<div class="entityInfo">
+  <form class="deleteEntityForm" action="/delete" method="post">
+    <% if (entity) { %>
+      <input type="hidden" name="entityId" value="<%= entity.id %>">
+
+      <% if (entity && entity.type==='FILE' ) { %>
+          <a class="download" href="/file/<%= entity.id %>" download>
+            Download <%= entity.name %>
+          </a>
+        <% } %>
+          <button class="deleteEntity" type="submit" class="deleteButton">Delete <%= entity.name %></button>
+          <% } %>
+  </form>
+
+  <div class="entity">
+    <% if (!entity) { %>
+      <p>No entity selected.</p>
+      <% } else { %>
+        <p><strong>Name:</strong>
+          <%= entity.name %>
+        </p>
+        <p><strong>Type:</strong>
+          <%= entity.type %>
+        </p>
+
+        <% if (entity.type==='FILE' ) { %>
+          <p><strong>Size:</strong>
+            <%= entity.size %> bytes
+          </p>
+          <% } %>
+
+            <p><strong>Created At:</strong>
+              <%= entity.createdAt ? entity.createdAt.toDateString() : 'N/A' %>
+            </p>
+  </div>
+
+  <% if (entity && entity.type==='FILE' ) { %>
+    <div class="entityImg">
+      <img alt="" class="fileImg" src="/file/<%= entity.id %>" />
+    </div>
+    <% } %>
+
+
+      <% if (entity.type==='FOLDER' && entity.childEntities.length) { %>
+        <div class="entityChildren">
+          <h4>Children</h4>
+          <hr>
+          <ul>
+            <!-- Folders first -->
+            <% entity.childEntities.filter(c=> c.type === 'FOLDER').forEach(folder => { %>
+              <li>📁 <%= folder.name %>
+              </li>
+              <% }) %>
+
+                <!-- Files next -->
+                <% entity.childEntities.filter(c=> c.type === 'FILE').forEach(file => { %>
+                  <li>📄 <%= file.name %> (<%= file.size %> bytes)</li>
+                  <% }) %>
+          </ul>
+        </div>
+        <% } %>
+          <% } %>
+</div>

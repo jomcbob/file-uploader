@@ -31,28 +31,34 @@
     </header>
     <aside>
       <h2>Upload an Image</h2>
-      <button id="openFilePopup">New File</button>
-      <button id="openFolderPopup">New Folder</button>
+      <div class="newEntityBox">
+        <button class="newEntity" id="openFilePopup">New File</button>
+        <button class="newEntity" id="openFolderPopup">New Folder</button>
+      </div>
       <hr>
 
       <ul class="tree">
         <% function render(nodes) { %>
           <% nodes.forEach(node=> { %>
-            <li>
+            <li data-id="<%= node.id %>" class="<%= selectedFolderId === node.id ? 'selected' : '' %>">
               <% if (node.type==="FOLDER" ) { %>
-                <div class="folder" data-open="false">
-                  <span class="icon">▶</span>
-                  <span class="name">
+                <div class="folder" tabindex="0" role="treeitem" aria-expanded="false" data-open="false">
+                  <span class="icon" data-toggle>▶</span>
+                  <a href="/?selectedFolder=<%= node.id %>" class="name idLink">
                     <%= node.name %>
-                  </span>
+                  </a>
                 </div>
-                <ul class="children">
+
+                <ul class="children" role="group">
                   <%= render(node.children) %>
                 </ul>
+
                 <% } else { %>
-                  <div class="file">
-                    📄 <%= node.name %>
-                      <small>(<%= node.size %> bytes)</small>
+                  <div class="file" tabindex="0" role="treeitem" data-id="<%= node.id %>">
+                    📄
+                    <a class="idLink" href="/?selectedFolder=<%= node.parentId %>&selectedFile=<%= node.id %>">
+                      <%= node.name %>
+                    </a>
                   </div>
                   <% } %>
             </li>
@@ -62,12 +68,11 @@
                 <%= render(tree) %>
       </ul>
 
+
+
     </aside>
     <section>
-      <p>
-        Use the form below to upload an image file to the server. Make sure you are logged in to access the upload
-        feature.
-      </p>
+      <%- include('./partials/entityInfo', { entity: entity }) %>
     </section>
   </div>
 
@@ -76,20 +81,69 @@
 
 <script src="/js/popup.js"></script>
 <script>
-  document.addEventListener("click", e => {
-    const folder = e.target.closest(".folder");
-    if (!folder) return;
+  function highlightAndOpen(id) {
+    if (!id) return;
 
-    const children = folder.nextElementSibling;
-    const icon = folder.querySelector(".icon");
+    // Remove previous selection
+    document.querySelectorAll(".selected").forEach(el => el.classList.remove("selected"));
 
-    const open = folder.dataset.open === "true";
-    folder.dataset.open = (!open).toString();
+    // Find the <li> for this id
+    const selectedLi = document.querySelector(`li[data-id='${id}']`);
+    if (!selectedLi) return;
 
-    children.style.display = open ? "none" : "block";
-    icon.textContent = open ? "▶" : "▼";
+    selectedLi.classList.add("selected");
+
+    // Expand all parent folders, but leave toggle logic intact
+    let parent = selectedLi.parentElement;
+    while (parent && parent.classList.contains("children")) {
+      const folder = parent.previousElementSibling;
+      if (folder && folder.classList.contains("folder")) {
+        const icon = folder.querySelector(".icon");
+        folder.dataset.open = "true";
+        folder.setAttribute("aria-expanded", "true");
+        parent.style.display = "block";
+        if (icon) icon.textContent = "▼";
+      }
+      parent = parent.parentElement.closest(".children");
+    }
+
+    // Scroll selected item into view
+    selectedLi.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+
+  // Run on page load
+  const selectedFolderId = "<%= selectedFolderId %>"; // from server
+  const selectedFileId   = "<%= selectedFileId %>";   // optional
+
+  if (selectedFolderId) highlightAndOpen(selectedFolderId);
+  if (selectedFileId) highlightAndOpen(selectedFileId);
+
+  // ---- Folder toggle (arrow only) ----
+  document.querySelectorAll(".icon[data-toggle]").forEach(icon => {
+    icon.addEventListener("click", e => {
+      e.stopPropagation(); // only toggle this folder
+      const folder = icon.closest(".folder");
+      const children = folder.nextElementSibling;
+      if (!children) return;
+
+      const open = folder.dataset.open === "true";
+      folder.dataset.open = String(!open);
+      folder.setAttribute("aria-expanded", String(!open));
+      children.style.display = open ? "none" : "block";
+      icon.textContent = open ? "▶" : "▼";
+    });
+
+    // Keyboard support for arrow toggle
+    icon.setAttribute("tabindex", "0");
+    icon.addEventListener("keydown", e => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      e.preventDefault();
+      icon.click();
+    });
   });
 </script>
+
+
 
 
 </html>

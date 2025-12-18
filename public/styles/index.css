@@ -32,7 +32,7 @@ aside {
   border-right: 2px solid #444444;
   padding: 20px;
   width: min(300px, 100%);
-  
+
 }
 
 section {
@@ -40,6 +40,7 @@ section {
   grid-row: 2 / -1;
   padding: 20px;
   width: 100%;
+  overflow-y: auto;
 }
 
 .flexWrap {
@@ -49,7 +50,7 @@ section {
 .tree,
 .tree ul {
   list-style: none;
-  padding-left: 16px;
+  padding-left: 3px;
 }
 
 .children {
@@ -69,6 +70,49 @@ section {
   width: 14px;
 }
 
-.file {
-  margin-left: 20px;
+.idLink {
+  color: #E0E0E0;
+  text-decoration: none;
+}
+
+.idLink:hover,
+.idLink:focus {
+  text-decoration: underline;
+}
+
+.selected {
+  background-color: #333333;
+  border-radius: 4px;
+}
+
+aside {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.newEntityBox {
+  display: flex;
+  width: 100%;
+  gap: 10px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.newEntity {
+  flex: 1;
+  color: #E0E0E0;
+  background-color: #121212;
+  text-decoration: none;
+  margin: 5px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 2px solid #444444;
+  cursor: pointer;
+}
+
+.newEntity:hover,
+.newEntity:focus {
+  background-color: #444444;
 }
