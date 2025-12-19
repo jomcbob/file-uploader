@@ -36,3 +36,53 @@ header a:hover,
 header a:focus {
   background-color: #444444;
 }
+
+.authForm {
+  background-color: #121212;
+  padding: 20px;
+  margin: 20px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: large;
+  width: min(100%, 300px);
+}
+
+.authForm legend {
+  font-size: x-large;
+  color: #E0E0E0;
+  margin-bottom: 20px;
+}
+
+.authForm button {
+  padding: 10px 20px;
+  font-size: large;
+  border: 2px solid #444444;
+  border-radius: 5px;
+  background-color: black;
+  color: #E0E0E0;
+  cursor: pointer;
+}
+
+.authForm button:hover,
+.authForm button:focus {
+  background-color: #444444;
+}
+
+.authForm input {
+  padding: 2px 4px;
+  font-size: large;
+  border: 2px solid #444444;
+  border-radius: 5px;
+  background-color: #444444;
+  color: #E0E0E0;
+}
+
+.signup {
+  width: min(100%, 300px);
+}
+
+.signupLink {
+  color: rgb(255, 153, 0);
+}

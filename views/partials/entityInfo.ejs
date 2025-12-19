@@ -6,9 +6,9 @@
       <input type="hidden" name="entityId" value="<%= entity.id %>">
 
       <% if (entity && entity.type==='FILE' ) { %>
-          <a class="download" href="/file/<%= entity.id %>" download>
-            Download <%= entity.name %>
-          </a>
+        <a class="download" href="/file/<%= entity.id %>" download>
+          Download <%= entity.name %>
+        </a>
         <% } %>
           <button class="deleteEntity" type="submit" class="deleteButton">Delete <%= entity.name %></button>
           <% } %>
@@ -28,6 +28,9 @@
         <% if (entity.type==='FILE' ) { %>
           <p><strong>Size:</strong>
             <%= entity.size %> bytes
+          </p>
+          <p><strong>Format:</strong>
+            <%= entity.mimeType %>
           </p>
           <% } %>
 
