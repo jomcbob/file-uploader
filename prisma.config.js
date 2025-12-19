@@ -5,8 +5,7 @@ export default defineConfig({
   schema: "prisma/schema.prisma",
 
   client: {
-    // output: "node_modules/.prisma/client",
-    output: "../generated/prisma"
+    output: "node_modules/.prisma/client",
   },
 
   migrations: {
