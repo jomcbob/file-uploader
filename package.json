@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "prisma generate",
-    "start": "node --watch app.js",
+    "start": "node app.js",
+    "start_l": "node --watch app.js",
     "start_db": "node db/seed.js"
   },
   "repository": {
