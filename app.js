@@ -34,7 +34,7 @@ app.get('/{*splat}', (req, res, next) => {
   next(err);
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, (error) => {
   if (error) throw error;
   console.log(`My Express app - listening on port ${PORT}!`);
