@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/styles/globle.css">
+  <link rel="stylesheet" href="/styles/durationForm.css">
+  <title>Duration Form</title>
+</head>
+
+<body>
+  <form action="/share/generate-link/<%= id %>" method="post">
+    <h2>Select link duration</h2>
+
+    <div class="radio-btns">
+      <input type="radio" id="1hr" name="duration" value="3600" checked hidden>
+      <label for="1hr" class="radio-btn">1 hour</label>
+
+      <input type="radio" id="3hr" name="duration" value="7200" hidden>
+      <label for="3hr" class="radio-btn">3 hours</label>
+
+      <input type="radio" id="7hr" name="duration" value="25200" hidden>
+      <label for="7hr" class="radio-btn">7 hours</label>
+    </div>
+
+    <input type="hidden" id="id" name="id" value="<%= id %>">
+    
+    <button class="submit" type="submit">Generate Link</button>
+  </form>
+</body>
+
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/styles/globle.css">
+  <link rel="stylesheet" href="/styles/entity.css">
+  <title>Veiw <%= token %>
+  </title>
+</head>
+
+<body>
+  <div class="buttons">
+    <div class="copy">
+      <pre id="codeBox"><%= APP_URL %>/share/token/<%= token %></pre>
+      <button onclick="copy()">Copy</button>
+    </div>
+    <a download class="download" href="/share/download/<%= token %>">
+      Download
+    </a>
+  </div>
+  <img src="/share/entity/<%= token %>" alt="Preview">
+
+</body>
+
+<script>
+  function copy() {
+    const text = document.getElementById("codeBox").innerText;
+    navigator.clipboard.writeText(text)
+  }
+</script>
+
+</html>

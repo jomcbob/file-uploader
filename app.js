@@ -4,9 +4,9 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { indexRoute } from './routes/indexRoute.js';
 import { authRoute } from './routes/authRoute.js';
-import { routeThree } from './routes/routeThree.js';
 import { authApp } from './lib/auth.js'; 
 import authController from './controllers/authController.js';
+import { shareRoute } from './routes/shareRoute.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -24,9 +24,9 @@ app.use(authApp);
 
 // non-auth routes first otherwise redirect loop
 app.use("/auth", authRoute);
+app.use("/share", shareRoute);
 // protected routes
 app.use("/", authController.isAuthenticated, indexRoute);
-app.use("/three", authController.isAuthenticated, routeThree);
 
 app.get('/{*splat}', (req, res, next) => {
   const err = new Error(`Page not found: ${req.originalUrl}`);

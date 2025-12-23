@@ -1,6 +1,7 @@
 import { prisma } from "../lib/prisma.js";
 import { s3 } from "../lib/s3.js";
-import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { getPresignedUrl } from "../lib/s3.js";
 
 
 function buildTree(items, parentId) {
@@ -41,14 +42,12 @@ async function renderIndex(req, res) {
       where: { id: selectedFolderId },
       include: { childEntities: true }
     });
-    console.log(deepestEntity);
   }
   if (selectedFileId) {
     deepestEntity = await prisma.entity.findFirst({
       where: { id: selectedFileId },
       include: { childEntities: true }
     });
-    console.log(deepestEntity);
   }
   res.render("index", { tree, title: "Home", selectedFolderId, selectedFileId, entity: deepestEntity });
 }
@@ -72,7 +71,6 @@ async function uploadImage(req, res) {
       Key: key,
       Body: req.file.buffer,
       ContentType: req.file.mimetype,
-      ACL: "public-read",
     })
   );
 
@@ -84,7 +82,7 @@ async function uploadImage(req, res) {
       type: "FILE",
       size: req.file.size,
       mimeType: req.file.mimetype,
-      url: fileUrl,          // 👈 IMPORTANT
+      url: fileUrl, 
       parentId,
       userId: req.user.id,
     },
@@ -96,7 +94,6 @@ async function uploadImage(req, res) {
 
 async function submitfolder(req, res) {
   const parentId = parseInt(req.body.parentId, 10)
-  console.log(parentId)
   if (!req.user) {
     return res.status(401).send('Not authenticated');
   }
@@ -149,61 +146,60 @@ async function deleteEntity(req, res) {
   res.redirect("/");
 }
 
-async function getEntityObject(id) {
+async function getEntity(id) {
   const entity = await prisma.entity.findUnique({ where: { id } });
   if (!entity || entity.type !== "FILE") return null;
 
-  const key = entity.url.split(`${process.env.RAILWAY_BUCKET_NAME}/`)[1];
+  const key = entity.url.split(
+    `${process.env.RAILWAY_BUCKET_NAME}/`
+  )[1];
 
-  const obj = await s3.send(
-    new GetObjectCommand({
-      Bucket: process.env.RAILWAY_BUCKET_NAME,
-      Key: key,
-    })
-  );
-
-  return { entity, stream: obj.Body };
+  return { entity, key };
 }
+
 
 async function previewFile(req, res) {
-  const result = await getEntityObject(Number(req.params.id));
-  if (!result) return res.status(404).send("File Not found");
+  const result = await getEntity(Number(req.params.id));
+  if (!result) return res.status(404).send("File not found");
 
-  const { entity, stream } = result;
+  if (result.entity.userId !== req.user.id) {
+    return res.status(403).send("Forbidden");
+  }
 
-  res.setHeader("Content-Type", entity.mimeType);
-  res.setHeader(
-    "Content-Disposition",
-    `inline; filename="${entity.name}"`
-  );
+  const url = await getPresignedUrl(result.key, {
+    inline: true,
+    filename: result.entity.name,
+    mimeType: result.entity.mimeType,
+    expiresIn: 60 * 60,
+  });
 
-  stream.pipe(res);
+  res.redirect(302, url);
 }
+
 
 async function downloadFile(req, res) {
-  const result = await getEntityObject(Number(req.params.id));
+  const result = await getEntity(Number(req.params.id));
   if (!result) return res.status(404).send("Not found");
 
-  const { entity, stream } = result;
+  if (result.entity.userId !== req.user.id) {
+    return res.status(403).send("Forbidden");
+  }
 
-  res.setHeader("Content-Type", "application/octet-stream");
-  res.setHeader(
-    "Content-Disposition",
-    `attachment; filename="${entity.name}"`
-  );
+  const url = await getPresignedUrl(result.key, {
+    inline: false,
+    filename: result.entity.name,
+    expiresIn: 60 * 60,
+  });
 
-  stream.pipe(res);
+  res.redirect(302, url);
 }
-
-
-
 
 export default {
   renderIndex,
   uploadImage,
   submitfolder,
   deleteEntity,
-  getEntityObject,
+  getEntity,
   previewFile,
   downloadFile,
 };

@@ -1,0 +1,47 @@
+img {
+  margin-top: 20px;
+  max-width: 95vw;
+  max-height: 90vh;
+  width: auto;
+  height: auto;
+}
+
+.buttons {
+  max-width: 80vw;
+  width: 100%;
+  display: flex;
+  justify-content: end;
+  margin-top: 20px;
+  padding: 0px 10px;
+  gap: 20px;
+}
+
+.download {
+  text-decoration: none;
+  background: #0d6efd;
+  color: #ffffff;
+  padding: 8px 12px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-size: medium;
+}
+
+.download:hover,
+.download:focus {
+  background: #0b5ed7;
+}
+
+.copy {
+  display: flex;
+  gap: 10px;
+  text-decoration: none;
+  background: #797d83;
+  color: #ffffff;
+  padding: 8px 12px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-size: medium;
+  margin-left: 10px;
+}

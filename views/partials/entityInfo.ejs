@@ -5,10 +5,16 @@
     <% if (entity) { %>
       <input type="hidden" name="entityId" value="<%= entity.id %>">
 
+      <a class="download" href="/share/<%= entity.id %>">
+        Share <%= entity.name %>
+      </a>
+
       <% if (entity && entity.type==='FILE' ) { %>
-        <a class="download" href="/file/<%= entity.id %>" download>
+
+        <a class="download" href="/download/<%= entity.id %>" download>
           Download <%= entity.name %>
         </a>
+
         <% } %>
           <button class="deleteEntity" type="submit" class="deleteButton">Delete <%= entity.name %></button>
           <% } %>

@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  // output   = "../generated/prisma"
   output   = "../node_modules/.prisma/client"
 }
 
@@ -9,11 +8,11 @@ datasource db {
 }
 
 model User {
-  id            Int     @id @default(autoincrement())
-  username      String  @unique 
-  password      String 
+  id            Int            @id @default(autoincrement())
+  username      String         @unique
+  password      String
   documents     Entity[]
-  sharedFolders SharedFolder[]
+  sharedFolders SharedEntity[]
 
   @@map("users")
 }
@@ -24,46 +23,48 @@ enum EntityType {
 }
 
 model Entity {
-  id              Int         @id @default(autoincrement())
-  name            String
+  id        Int        @id @default(autoincrement())
+  name      String
   url       String?
-  type            EntityType
-  size            Int?
-  mimeType        String?
-  createdAt       DateTime    @default(now())
-  parentId        Int?   
-  userId          Int
-  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      EntityType
+  size      Int?
+  mimeType  String?
+  createdAt DateTime   @default(now())
+  parentId  Int?
+  userId    Int
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  parentFolder    Entity?         @relation("EntityParent", fields: [parentId], references: [id], onDelete: Cascade)
-  childEntities   Entity[]        @relation("EntityParent")
-  sharedFolders   SharedFolder[]
+  parentFolder  Entity?        @relation("EntityParent", fields: [parentId], references: [id], onDelete: Cascade)
+  childEntities Entity[]       @relation("EntityParent")
+  sharedFolders SharedEntity[]
 
   @@index([parentId])
   @@index([userId])
-
   @@map("entities")
 }
 
 model Session {
-  id          String   @id
-  sid         String   @unique
-  data        String   @db.Text
-  expiresAt   DateTime
+  id        String   @id
+  sid       String   @unique
+  data      String   @db.Text
+  expiresAt DateTime
 
   @@map("sessions")
 }
 
-model SharedFolder {
-  id          String    @id @default(uuid())
-  userId      Int
-  folderId    Int
-  expiresAt   DateTime
-  
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  folder Entity @relation(fields: [folderId], references: [id], onDelete: Cascade)
+model SharedEntity {
+  id        String   @id @default(uuid())
+  userId    Int
+  entityId  Int
 
-  @@map("shared_folders")
+  shareToken   String?   @unique
+  shareExpires DateTime?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entity Entity @relation(fields: [entityId], references: [id], onDelete: Cascade)
+
   @@index([userId])
-  @@index([folderId])
+  @@index([entityId])
+  @@map("shared_entities")
 }
+
