@@ -1,28 +1,12 @@
-# This is a template!
+# File Uploader
 
-I made this so I don't have to make a new file setup every time my online course [The Odin Project](https://theodinproject.com) tells me to
+This project lets you manage your files and folders by logging into an account and uploading files from your device. Once stored, you can delete or share your files and folders anytime.  
+**100% free**
 
-## How to Use
+### Features
 
-### 1. Clone the repository
+- Nested folders (you can have a folder inside another folder)
 
-```bash
-git clone https://github.com/jomcbob/node_template.git
-```
+### Website
 
-### 2. Install dependencies
-
-```bash
-cd node_template
-npm install
-```
-
-### 3. Run the project
-
-```bash
-npm run start
-```
-
-### 4. Open in browser
-
-Go to [http://localhost:3000](http://localhost:3000)
+[Live Preview](https://file-uploader67.up.railway.app/)
