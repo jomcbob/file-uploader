@@ -41,5 +41,19 @@ app.listen(PORT, (error) => {
 });
 
 app.use((err, req, res, next) => {
+  if (err?.code === "LIMIT_FILE_SIZE") {
+    return res.status(413).send("File too large (max 5MB)");
+  }
+
+  if (err?.name === "MulterError") {
+    return res.status(400).send(err.message);
+  }
+
+  next(err);
+});
+
+
+
+app.use((err, req, res, next) => {
   res.status(err.statusCode || 500).render('error', { title: 'Error', error: err });
 });

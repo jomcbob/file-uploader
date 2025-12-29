@@ -2,32 +2,66 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="/styles/globle.css">
-  <link rel="stylesheet" href="/styles/entity.css">
-  <title>Veiw <%= token %>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/styles/globle.css" />
+  <link rel="stylesheet" href="/styles/entity.css" />
+  <title>View <%= entity.name %>
   </title>
 </head>
 
 <body>
-  <div class="buttons">
-    <div class="copy">
-      <pre id="codeBox"><%= APP_URL %>/share/token/<%= token %></pre>
-      <button onclick="copy()">Copy</button>
+
+  <div class="header">
+    <h1>
+      <%= entity.name %>
+    </h1>
+
+    <div class="buttons">
+      <div class="copy">
+        <pre id="codeBox" data-url="<%= APP_URL %>/share/token/<%= token %>" onclick="copy()">Copy Link</pre>
+      </div>
+
+      <% if (entity.type==="FILE" ) { %>
+        <a class="download" href="/share/download/<%= token %>">
+          Download
+        </a>
+        <% } %>
     </div>
-    <a download class="download" href="/share/download/<%= token %>">
-      Download
-    </a>
   </div>
-  <img src="/share/entity/<%= token %>" alt="Preview">
+
+  <hr>
+
+  <% if (entity.type==="FILE" ) { %>
+    <!-- File preview -->
+    <img src="/share/entity/<%= token %>" alt="Preview" />
+    <% } %>
+
+      <% if (entity.type==="FOLDER" ) { %>
+        <div>
+          <% allFiles.forEach(file=> { %>
+            <div class="file" loading="lazy">
+              <div class="fileTop">
+                <h3>
+                  <%= file.name %>
+                </h3>
+                <a class="download" href="/share/download/<%= token %>?folderId=<%= file.id %>">
+                  Download
+                </a>
+              </div>
+              <img src="/share/entity/<%= token %>?folderId=<%= file.id %>" alt="" />
+            </div>
+            <% }) %>
+        </div>
+        <% } %>
+
 
 </body>
 
 <script>
   function copy() {
-    const text = document.getElementById("codeBox").innerText;
-    navigator.clipboard.writeText(text)
+    const text = document.getElementById("codeBox").dataset.url;
+    navigator.clipboard.writeText(text);
   }
 </script>
 

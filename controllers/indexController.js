@@ -2,6 +2,7 @@ import { prisma } from "../lib/prisma.js";
 import { s3 } from "../lib/s3.js";
 import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getPresignedUrl } from "../lib/s3.js";
+import { body, validationResult } from 'express-validator';
 
 
 function buildTree(items, parentId) {
@@ -82,7 +83,7 @@ async function uploadImage(req, res) {
       type: "FILE",
       size: req.file.size,
       mimeType: req.file.mimetype,
-      url: fileUrl, 
+      url: fileUrl,
       parentId,
       userId: req.user.id,
     },
@@ -91,26 +92,64 @@ async function uploadImage(req, res) {
   res.redirect("/");
 }
 
+const validateFolder = [
+  body('folderName')
+    .exists().withMessage('Folder name required')
+    .isString().withMessage('Folder name must be a string')
+    .trim()
+    .notEmpty().withMessage('Folder name cannot be empty')
+    .isLength({ max: 50 }).withMessage('Folder name too long max 50 letters')
+    .matches(/^[^\\/:*?"<>|]+$/).withMessage('Invalid characters in folder name'),
+]
 
-async function submitfolder(req, res) {
-  const parentId = parseInt(req.body.parentId, 10)
+export async function submitfolder(req, res) {
   if (!req.user) {
     return res.status(401).send('Not authenticated');
   }
 
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const formatted = errors.array().reduce((acc, err) => {
+      acc[err.path] ??= [];
+      acc[err.path].push(err.msg);
+      return acc;
+    }, {});
+
+    return res.status(400).json({ errors: formatted });
+  }
+
+
+  const parentId = req.body.parentId ? Number(req.body.parentId) : null;
+  const folderName = req.body.folderName;
+
+  // Prevent duplicate folders in same parent
+  const exists = await prisma.entity.findFirst({
+    where: {
+      name: folderName,
+      type: 'FOLDER',
+      parentId,
+      userId: req.user.id,
+    },
+  });
+
+  if (exists) {
+    return res.status(409).send('Folder already exists');
+  }
+
   await prisma.entity.create({
     data: {
-      name: req.body.folderName,
+      name: folderName,
       type: 'FOLDER',
       size: 0,
       mimeType: null,
-      parentId: parentId || null,
+      parentId,
       userId: req.user.id,
     },
   });
 
   res.redirect('/');
 }
+
 
 async function deleteEntity(req, res) {
   const entityId = parseInt(req.body.entityId, 10);
@@ -202,4 +241,5 @@ export default {
   getEntity,
   previewFile,
   downloadFile,
+  validateFolder,
 };

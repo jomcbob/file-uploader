@@ -6,28 +6,32 @@ function pickDuration(req, res) {
   res.render("durationForm", { id: req.params.id });
 }
 
-function renderSharedEntity(req, res) {
+async function checkSharedEntityToken(req, res, next) {
   const { token } = req.params;
 
-  res.render("entity", {
-    token,
-    APP_URL: process.env.APP_URL,
+  const shared = await prisma.sharedEntity.findFirst({
+    where: { shareToken: token, shareExpires: { gt: new Date() } },
+    include: { entity: true }
   });
+  if (!shared) return res.status(404).send("Link expired or invalid")
+
+  req.shared = shared
+  next()
 }
 
-export async function createShare(req, res) {
+async function createShareLink(req, res) {
   const { id } = req.params;
-  const duration = parseInt(req.body.duration, 10);
+  const duration = parseInt(req.body.duration, 10)
 
   const entity = await prisma.entity.findUnique({
     where: { id: Number(id) },
-  });
+  })
 
-  if (!entity) return res.status(404).send("Not found");
-  if (entity.userId !== req.user.id) return res.status(403).send("Forbidden");
+  if (!entity) return res.status(404).send("Not found")
+  if (entity.userId !== req.user.id) return res.status(403).send("Forbidden")
 
-  const token = crypto.randomBytes(32).toString("hex");
-  const expiresAt = new Date(Date.now() + duration * 1000);
+  const token = crypto.randomBytes(32).toString("hex")
+  const expiresAt = new Date(Date.now() + duration * 1000)
 
   await prisma.sharedEntity.create({
     data: {
@@ -36,94 +40,115 @@ export async function createShare(req, res) {
       shareToken: token,
       shareExpires: expiresAt,
     },
-  });
+  })
 
-  res.redirect(`/share/token/${token}`);
+  res.redirect(`/share/token/${token}`)
 }
 
-export async function accessSharedEntity(req, res) {
-  const { token } = req.params;
+async function renderSharedEntity(req, res) {
+  const root = req.shared.entity
 
-  const shared = await prisma.sharedEntity.findFirst({
-    where: { shareToken: token, shareExpires: { gt: new Date() } },
-    include: { entity: { include: { childEntities: true } } },
-  });
+  const allEntities = await prisma.entity.findMany({
+    where: { userId: root.userId },
+  })
 
-  if (!shared) return res.status(404).send("Link expired or invalid");
+  const files = collectAllFiles(root.id, allEntities)
 
-  const entity = shared.entity;
+  res.render("entity", {
+    token: req.params.token,
+    entity: root,
+    allFiles: files,
+    APP_URL: process.env.APP_URL,
+  })
+}
 
-  if (entity.type === "FILE") {
-    const key = entity.url.split(`${process.env.RAILWAY_BUCKET_NAME}/`)[1];
-    const url = await getPresignedUrl(key, {
-      inline: true,
-      filename: entity.name,
-      mimeType: entity.mimeType,
-      expiresIn: 300, // temporary
-    });
-    return res.redirect(302, url);
-  }
+function collectAllFiles(rootId = null, allEntities) {
+  const files = []
+  const childrenMap = new Map()
 
-  const files = [];
-  function collectFiles(folder) {
-    for (const child of folder.childEntities) {
-      if (child.type === "FILE") files.push(child);
-      else if (child.type === "FOLDER") collectFiles(child);
+  // Build map: parentId → [childEntities]
+  allEntities.forEach(e => {
+    if (!childrenMap.has(e.parentId)) childrenMap.set(e.parentId, [])
+    childrenMap.get(e.parentId).push(e)
+  })
+
+  function recurse(parentId) {
+    const children = childrenMap.get(parentId) || []
+    for (const child of children) {
+      if (child.type === "FILE") files.push(child)
+      else if (child.type === "FOLDER") recurse(child.id)
     }
   }
-  collectFiles(entity);
 
-  const fileLinks = await Promise.all(files.map(async (file) => {
-    const key = file.url.split(`${process.env.RAILWAY_BUCKET_NAME}/`)[1];
-    const url = await getPresignedUrl(key, {
-      inline: true,
-      filename: file.name,
-      mimeType: file.mimeType,
-      expiresIn: 300,
-    });
-    return { name: file.name, url };
-  }));
-
-  res.render("sharedFolder", { folderName: entity.name, files: fileLinks });
+  recurse(rootId); // rootId is null for top-level
+  return files
 }
 
-async function getSharedEntity(token) {
-  const shared = await prisma.sharedEntity.findUnique({
+async function fetchFromBucket(inline, token, folderId, res) {
+
+  const shared = await prisma.sharedEntity.findFirst({
     where: { shareToken: token },
     include: { entity: true },
   });
 
-  if (!shared) return null;
-  if (shared.shareExpires < new Date()) return null;
-  if (shared.entity.type !== "FILE") return null;
+  if (!shared) {
+    return res.status(404).send("Link invalid")
+  }
 
-  const key = shared.entity.url.split(
-    `${process.env.RAILWAY_BUCKET_NAME}/`
-  )[1];
+  if (shared.shareExpires <= new Date()) {
+    await prisma.sharedEntity.delete({
+      where: { id: '780c5a0d-652f-4998-af61-9f5e8ba3ed55' },
+    });
+    return res.status(404).send("Link expired")
+  }
 
-  return { entity: shared.entity, key };
-}
 
+  let allFiles
+  let fileEntity
+  if (folderId) {
+    console.log("folderEntity")
+    // then find all files / folders of the user that shared the entity
+    const allEntities = await prisma.entity.findMany({
+      where: { userId: shared.entity.userId },
+    })
+    fileEntity = allEntities.find(e => e.id === Number(folderId))
+    if (!fileEntity) return res.status(404).send("folder not found")
 
-export async function downloadShared(req, res) {
-  const result = await getSharedEntity(req.params.token);
-  if (!result) return res.status(404).send("Not found");
+    allFiles = collectAllFiles(fileEntity.id, allEntities)
+  } else {
+    console.log("fileEntity")
+    fileEntity = shared.entity
+    if (!fileEntity || fileEntity.type !== "FILE") return res.status(404).send("File not found")
+  }
 
-  const url = await getPresignedUrl(result.key, {
-    inline: false,
-    filename: result.entity.name,
-    expiresIn: 60 * 60,
+  const key = fileEntity.url.split(`${process.env.RAILWAY_BUCKET_NAME}/`)[1]
+  console.log(key + " " + 'key')
+  const url = await getPresignedUrl(key, {
+    inline: inline,
+    filename: fileEntity.name,
+    mimeType: fileEntity.mimeType,
+    expiresIn: 60 * 60 * 24, // 1 day
   });
 
   res.redirect(302, url);
 }
 
 
+async function accessSharedFile(req, res) {
+  await fetchFromBucket(true, req.params.token, req.query.folderId, res)
+}
+
+
+export async function downloadShared(req, res) {
+  await fetchFromBucket(false, req.params.token, req.query.folderId, res)
+}
+
+
 export default {
   pickDuration,
-  accessSharedEntity,
-  createShare,
+  createShareLink,
   renderSharedEntity,
-  getSharedEntity,
   downloadShared,
+  checkSharedEntityToken,
+  accessSharedFile,
 };
