@@ -9,4 +9,4 @@ This project lets you manage your files and folders by logging into an account a
 
 ### Website
 
-[Live Preview](https://file-uploader67.up.railway.app/)
+[Live Preview](https://jomcbob.github.io/takedown-notice/)
